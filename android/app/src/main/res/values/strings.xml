@@ -14,7 +14,10 @@
     <string name="launcher_play">JUGAR  ›</string>
     <string name="launcher_settings">Ajustes</string>
     <string name="launcher_no_core">Esta versión de la app no incluye este juego. Importa su núcleo desde la carpeta (libmonoloco_gameN.so, hecho en tu PC) o usa una APK compilada con tu ROM.</string>
-    <string name="launcher_no_rom">Elige la carpeta con tus ROM (EE. UU.). La app las reconoce aunque tengan otro nombre.</string>
+    <string name="launcher_no_rom">Elige una sola vez la carpeta con las ROM de los tres juegos (EE. UU.). La app las reconoce aunque tengan otro nombre y la recuerda: si luego añades una ROM a esa carpeta, se importa sola.</string>
+    <string name="launcher_state_ready">✓ Listo</string>
+    <string name="launcher_state_no_rom">Falta la ROM</string>
+    <string name="launcher_state_no_core">No incluido en esta versión</string>
     <string name="launcher_ready_description">Todo listo. Atrás abre el menú rápido durante la partida.</string>
     <string name="launcher_ready_status">Pulsa Jugar.</string>
     <string name="launcher_auto_starting">Iniciando… Toca la pantalla o pulsa un botón para cancelar.</string>

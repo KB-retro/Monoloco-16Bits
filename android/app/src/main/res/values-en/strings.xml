@@ -10,7 +10,10 @@
     <string name="launcher_play">PLAY  ›</string>
     <string name="launcher_settings">Settings</string>
     <string name="launcher_no_core">This version of the app does not include this game. Import its core from the folder (libmonoloco_gameN.so, built on your PC) or use an APK built with your ROM.</string>
-    <string name="launcher_no_rom">Choose the folder with your ROMs (USA). The app recognises them whatever their names.</string>
+    <string name="launcher_no_rom">Choose once the folder with the ROMs of the three games (USA). The app recognises them whatever their names and remembers it: a ROM added to that folder later comes in on its own.</string>
+    <string name="launcher_state_ready">✓ Ready</string>
+    <string name="launcher_state_no_rom">ROM missing</string>
+    <string name="launcher_state_no_core">Not in this version</string>
     <string name="launcher_ready_description">All set. Back opens the quick menu while playing.</string>
     <string name="launcher_ready_status">Press Play.</string>
     <string name="launcher_auto_starting">Starting… Touch the screen or press a button to cancel.</string>

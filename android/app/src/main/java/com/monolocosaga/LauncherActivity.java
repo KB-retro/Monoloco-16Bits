@@ -43,6 +43,8 @@ public final class LauncherActivity extends Activity {
         @Override public void run() { startGame(); }
     };
     private final View[] rows = new View[Games.COUNT + 1];
+    private final TextView[] states = new TextView[Games.COUNT + 1];
+    private boolean rescanned;
     private TextView status;
     private Button play;
     private Button chooseButton;
@@ -74,7 +76,7 @@ public final class LauncherActivity extends Activity {
             @Override public void onClick(View view) {
                 handler.removeCallbacks(autoStart);
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
                 startActivityForResult(intent, PICK_FOLDER);
             }
         });
@@ -92,8 +94,38 @@ public final class LauncherActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        // One folder holds the three games: a ROM added to it later comes in on its own.
+        Uri tree = savedFolder();
+        if (!rescanned && tree != null && missingRom()) {
+            rescanned = true;
+            importFolder(tree, false);
+            return;
+        }
         showGame(game, autoStartAllowed);
         autoStartAllowed = false;
+    }
+
+    private Uri savedFolder() {
+        String tree = LauncherSettings.prefs(this).getString("tree", null);
+        return tree != null ? Uri.parse(tree) : null;
+    }
+
+    /** A game this APK can run (it has the core) still waits for its ROM. */
+    private boolean missingRom() {
+        for (int g = 1; g <= Games.COUNT; g++) {
+            if (Games.core(this, g) != null && !Games.hasRom(this, g)) return true;
+        }
+        return false;
+    }
+
+    /** Under each game: ready, waiting for its ROM, or not in this version of the app. */
+    private void updateStates() {
+        for (int g = 1; g <= Games.COUNT; g++) {
+            boolean core = Games.core(this, g) != null, rom = Games.hasRom(this, g);
+            states[g].setText(!core ? R.string.launcher_state_no_core
+                : rom ? R.string.launcher_state_ready : R.string.launcher_state_no_rom);
+            states[g].setTextColor(!core ? 0xFF8E9A94 : rom ? 0xFF6FE3A4 : 0xFFF3C28C);
+        }
     }
 
     private void buildGameList() {
@@ -126,8 +158,13 @@ public final class LauncherActivity extends Activity {
             subtitle.setText(Games.SUBTITLES[g - 1]);
             subtitle.setTextColor(0xFFA9C8B8);
             subtitle.setTextSize(12);
+            TextView state = new TextView(this);
+            state.setTextSize(12);
+            state.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
             text.addView(title);
             text.addView(subtitle);
+            text.addView(state);
+            states[g] = state;
             row.addView(text, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
             row.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View view) {
@@ -160,6 +197,7 @@ public final class LauncherActivity extends Activity {
         handler.removeCallbacks(autoStart);
         game = which;
         for (int g = 1; g <= Games.COUNT; g++) rows[g].setSelected(g == which);
+        updateStates();
         TextView heading = findViewById(R.id.launcher_heading);
         TextView description = findViewById(R.id.launcher_description);
         heading.setText(Games.TITLES[which - 1]);
@@ -217,11 +255,23 @@ public final class LauncherActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != PICK_FOLDER || resultCode != RESULT_OK || data == null || data.getData() == null) return;
-        importFolder(data.getData());
+        Uri tree = data.getData();
+        // Kept, so the launcher can look in the same folder again later.
+        try {
+            getContentResolver().takePersistableUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            LauncherSettings.prefs(this).edit().putString("tree", tree.toString()).apply();
+        } catch (SecurityException exception) {
+            Log.w("Monoloco", "Folder permission not kept", exception);
+        }
+        rescanned = true;
+        importFolder(tree, true);
     }
 
-    private void importFolder(final Uri tree) {
+    /** chosen: the player just picked the folder (a later look in the saved one reports only news). */
+    private void importFolder(final Uri tree, final boolean chosen) {
         installScreen = InstallScreen.show(this, (android.view.ViewGroup) findViewById(R.id.launcher_root));
+        final boolean[] had = new boolean[Games.COUNT + 1];
+        for (int g = 1; g <= Games.COUNT; g++) had[g] = Games.hasRom(this, g);
         worker.execute(new Runnable() {
             @Override public void run() {
                 String message;
@@ -234,11 +284,21 @@ public final class LauncherActivity extends Activity {
                             });
                         }
                     });
-                    message = describe(scan);
+                    if (!chosen) {
+                        // A later look in the saved folder: only the games it brought in.
+                        for (int g = 1; g <= Games.COUNT; g++) {
+                            scan.roms[g] &= !had[g];
+                            scan.cores[g] = false;
+                        }
+                        scan.unknownRoms = scan.badCores = 0;
+                    }
+                    message = chosen || scan.any() ? describe(scan) : "";
                     for (int g = 1; g <= Games.COUNT; g++) if (scan.roms[g] || scan.cores[g]) { found = g; break; }
                 } catch (IOException | RuntimeException exception) {
                     Log.w("Monoloco", "Folder import failed", exception);
-                    message = getString(R.string.launcher_unreadable);
+                    message = chosen ? getString(R.string.launcher_unreadable) : "";
+                    // The saved folder is gone or no longer readable: ask for it again next time.
+                    if (!chosen) LauncherSettings.prefs(LauncherActivity.this).edit().remove("tree").apply();
                 }
                 final String result = message;
                 final int first = found;
@@ -251,7 +311,8 @@ public final class LauncherActivity extends Activity {
                         // Never start on its own after choosing a folder; Play does.
                         int show = !Games.hasRom(LauncherActivity.this, game) && first > 0 ? first : game;
                         Games.select(LauncherActivity.this, show);
-                        showGame(show, false);
+                        showGame(show, !chosen && autoStartAllowed);
+                        autoStartAllowed = false;
                     }
                 });
             }
