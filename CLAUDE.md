@@ -39,8 +39,8 @@ Repo: https://github.com/KB-retro/monoloco-16bits. No fusionar cambios de upstre
   retocan el código generado…): revisar si cambia el commit fijado del submódulo.
 - Cada partida corre en el proceso `:game`; al salir se mata el proceso (estado global del motor).
 - Los núcleos necesitan el código generado desde la ROM. Sin él la APK se compila igual, sin ese
-  juego. Tres vías: (1) compilación local con `local.properties` (`monoloco.rom1=...`), (2) secretos
-  opcionales `MONOLOCO_ROM1_URL`… en Actions, (3) importar desde la carpeta un núcleo hecho en el PC
+  juego. Tres vías: (1) compilación local con `local.properties` (`monoloco.rom1=...`), (2) secreto
+  opcional `MONOLOCO_ROMS_URL` (carpeta o .zip; `tools/find_roms.py`) o `MONOLOCO_ROMn_URL` en Actions, (3) importar desde la carpeta un núcleo hecho en el PC
   con `tools/build_cores.sh` (se copia a `files/cores/` y se marca de solo lectura).
 - Las ROM se importan desde la carpeta elegida: se reconocen por tamaño y SHA-256 (se quita la
   cabecera de 512 bytes si la hay) y se copian a `<carpeta de la app>/gameN/rom.sfc`.

@@ -4,10 +4,10 @@ name: Android APK
 # Pushes to ci/** branches build too, only to check that the port still compiles.
 #
 # The games' code is generated from the player's ROM, which never enters the
-# repository. Optional secrets MONOLOCO_ROM1_URL, MONOLOCO_ROM2_URL and
-# MONOLOCO_ROM3_URL (direct, private links to your own ROMs) put those games in
-# a hand-run APK; without them the APK has the launcher and no games, which can
-# be added by importing cores built with tools/build_cores.sh.
+# repository. The optional secret MONOLOCO_ROMS_URL (a private link to a folder
+# or .zip with your own ROMs; MONOLOCO_ROM1_URL..3 also work, one per game) puts
+# those games in a hand-run APK; without it the APK has the launcher and no
+# games, which can be added by importing cores built with tools/build_cores.sh.
 on:
   workflow_dispatch:
   push:
@@ -67,25 +67,39 @@ jobs:
       - name: Your ROMs (optional, hand-run builds only)
         if: github.event_name == 'workflow_dispatch'
         env:
+          ROMS: ${{ secrets.MONOLOCO_ROMS_URL }}
           ROM1: ${{ secrets.MONOLOCO_ROM1_URL }}
           ROM2: ${{ secrets.MONOLOCO_ROM2_URL }}
           ROM3: ${{ secrets.MONOLOCO_ROM3_URL }}
         run: |
           mkdir -p "$RUNNER_TEMP/roms"
-          for game in 1 2 3; do
-            var="ROM$game"; url="${!var}"
-            if [ -z "$url" ]; then
-              echo "::notice::No MONOLOCO_ROM${game}_URL secret: game $game is not included."
-              continue
-            fi
-            # Dropbox share links open a web page; dl=1 downloads the file itself.
+          # Dropbox share links open a web page; dl=1 downloads the file (a folder comes as a .zip).
+          direct() {
+            local url="$1"
             case "$url" in
               *dropbox.com*) url="${url//dl=0/dl=1}"; [[ "$url" == *dl=1* ]] || url="$url$([[ "$url" == *\?* ]] && echo '&' || echo '?')dl=1" ;;
             esac
-            file="$RUNNER_TEMP/roms/game$game.sfc"
-            curl -fsSL --retry 3 -o "$file" "$url" || { echo "::error::Cannot download MONOLOCO_ROM${game}_URL"; exit 1; }
-            echo "monoloco.rom$game=$file" >> local.properties
+            echo "$url"
+          }
+          n=0
+          for name in ROMS ROM1 ROM2 ROM3; do
+            url="${!name}"
+            [ -n "$url" ] || continue
+            n=$((n + 1))
+            file="$RUNNER_TEMP/roms/download$n"
+            curl -fsSL --retry 3 -o "$file" "$(direct "$url")" || { echo "::error::Cannot download the $name link"; exit 1; }
           done
+          if [ "$n" -eq 0 ]; then
+            echo "::notice::No MONOLOCO_ROMS_URL secret: the APK has no games."
+            exit 0
+          fi
+          # Each ROM is recognised by its SHA-256, whatever its name; a folder link arrives as a .zip.
+          for file in "$RUNNER_TEMP"/roms/download*; do
+            python3 tools/find_roms.py "$file" >> local.properties
+          done
+          found=$(grep -c '^monoloco.rom' local.properties || true)
+          [ "$found" -gt 0 ] || { echo "::error::None of the downloaded files is a supported ROM (USA v1.0)."; exit 1; }
+          grep '^monoloco.rom' local.properties | sed 's/=.*//' | while read -r key; do echo "::notice::Included: $key"; done
 
       - name: Signing key
         env:

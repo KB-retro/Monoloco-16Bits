@@ -27,8 +27,9 @@ generado y los núcleos compilados (`libmonoloco_gameN.so`) contienen código de
 **nunca se suben a este repositorio**. Hay tres formas de tener un juego en la app:
 
 1. **Compilar tú la APK** con tus ROM (ver abajo).
-2. **GitHub Actions con secretos opcionales** `MONOLOCO_ROM1_URL`, `MONOLOCO_ROM2_URL` y
-   `MONOLOCO_ROM3_URL` (enlace directo y privado a tu ROM). Sin ellos la APK sale sin juegos.
+2. **GitHub Actions con el secreto opcional** `MONOLOCO_ROMS_URL`: enlace privado a una carpeta
+   (o .zip) con tus ROM, por ejemplo de Dropbox tal cual. Cada ROM se reconoce por su huella.
+   También valen `MONOLOCO_ROM1_URL`… uno por juego. Sin ellos la APK sale sin juegos.
 3. **Importar un núcleo** hecho en tu PC con `tools/build_cores.sh`: copia el `.so` a la carpeta
    elegida junto a las ROM y pulsa **Cambiar carpeta**.
 
