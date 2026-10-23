@@ -31,7 +31,8 @@ def main() -> int:
     found = {}
     unknown = 0
     if source.is_file() and zipfile.is_zipfile(source):
-        out = source.with_suffix("")
+        # A download may have no extension: never reuse the archive's own name.
+        out = source.parent / (source.name + ".roms")
         out.mkdir(exist_ok=True)
         with zipfile.ZipFile(source) as archive:
             for info in archive.infolist():
