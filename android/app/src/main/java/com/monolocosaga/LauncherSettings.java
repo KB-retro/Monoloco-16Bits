@@ -10,7 +10,7 @@ final class LauncherSettings {
         FILTER = "filter", EFFECT = "effect", VOLUME = "volume", FPS = "fps", SLOT = "slot",
         FAST_CORES = "fast_cores", HD_LEVEL = "hd_level";
     /** Reconstruct, the HD upscaler, unless the player picked another filter. */
-    static final int DEFAULT_FILTER = 3;
+    static final int DEFAULT_FILTER = 2;
 
     private LauncherSettings() { }
 

@@ -106,7 +106,7 @@
     <string name="quick_fast_cores">Núcleos rápidos</string>
     <string name="quick_fast_cores_tip">Mantiene el juego en los núcleos más potentes del procesador. Desactívalo solo si la consola se calienta demasiado.</string>
     <string name="quick_filter">Filtro</string>
-    <string name="quick_filter_tip">HD reconstruye el dibujo: deshace el tramado de los gráficos y suaviza las diagonales sin emborronar. Nítido suavizado mantiene los píxeles tal cual. Los efectos de líneas y CRT no se aplican con HD.</string>
+    <string name="quick_filter_tip">Nítido suavizado mantiene los píxeles tal cual. HD reconstruye el dibujo: deshace el tramado y suaviza las diagonales, a costa de verse más blando. Los efectos de líneas y CRT no se aplican con HD.</string>
     <string-array name="quick_filters">
         <item>Nítido</item>
         <item>Suave</item>

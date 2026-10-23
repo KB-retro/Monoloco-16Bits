@@ -101,7 +101,7 @@
     <string name="quick_fast_cores">Fast cores</string>
     <string name="quick_fast_cores_tip">Keeps the game on the processor\'s most powerful cores. Turn it off only if the device gets too hot.</string>
     <string name="quick_filter">Filter</string>
-    <string name="quick_filter_tip">HD rebuilds the artwork: it undoes the dithering and smooths diagonals without blur. Sharp smooth keeps the pixels as they are. Scanlines and CRT do not apply with HD.</string>
+    <string name="quick_filter_tip">Sharp smooth keeps the pixels as they are. HD rebuilds the artwork: it undoes the dithering and smooths diagonals, at the cost of a softer look. Scanlines and CRT do not apply with HD.</string>
     <string-array name="quick_filters">
         <item>Sharp</item>
         <item>Smooth</item>
