@@ -551,7 +551,9 @@ final class QuickMenuDialog {
 
     private void addFilterRows() {
         addChoice(R.string.quick_filter, R.string.quick_filter_tip,
-            setting(LauncherSettings.FILTER, 2, R.array.quick_filters));
+            setting(LauncherSettings.FILTER, LauncherSettings.DEFAULT_FILTER, R.array.quick_filters));
+        addChoice(R.string.quick_hd_level, R.string.quick_hd_level_tip,
+            setting(LauncherSettings.HD_LEVEL, 1, R.array.quick_hd_levels));
         addChoice(R.string.quick_effect, R.string.quick_effect_tip,
             setting(LauncherSettings.EFFECT, 0, R.array.quick_effects));
     }

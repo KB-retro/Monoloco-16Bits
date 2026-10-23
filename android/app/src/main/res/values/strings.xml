@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Monoloco Saga</string>
-    <string name="game1_title" translatable="false">Monoloco Saga 1</string>
+    <string name="game1_title" translatable="false">Monoloco 1</string>
     <string name="game1_subtitle">La isla de la selva</string>
-    <string name="game2_title" translatable="false">Monoloco Saga 2</string>
+    <string name="game2_title" translatable="false">Monoloco 2</string>
     <string name="game2_subtitle">La isla de los piratas</string>
-    <string name="game3_title" translatable="false">Monoloco Saga 3</string>
+    <string name="game3_title" translatable="false">Monoloco 3</string>
     <string name="game3_subtitle">Las tierras del norte</string>
 
     <string name="launcher_platform">TRILOGÍA DE PLATAFORMAS · 16 BITS · ANDROID</string>
@@ -106,11 +106,19 @@
     <string name="quick_fast_cores">Núcleos rápidos</string>
     <string name="quick_fast_cores_tip">Mantiene el juego en los núcleos más potentes del procesador. Desactívalo solo si la consola se calienta demasiado.</string>
     <string name="quick_filter">Filtro</string>
-    <string name="quick_filter_tip">Nítido suavizado mantiene los píxeles definidos sin dientes de sierra al escalar.</string>
+    <string name="quick_filter_tip">HD reconstruye el dibujo: deshace el tramado de los gráficos y suaviza las diagonales sin emborronar. Nítido suavizado mantiene los píxeles tal cual. Los efectos de líneas y CRT no se aplican con HD.</string>
     <string-array name="quick_filters">
         <item>Nítido</item>
         <item>Suave</item>
         <item>Nítido suavizado</item>
+        <item>HD (reconstruir)</item>
+    </string-array>
+    <string name="quick_hd_level">Nivel HD</string>
+    <string name="quick_hd_level_tip">Bajo: solo deshace el tramado. Medio y alto redondean además las diagonales y los degradados.</string>
+    <string-array name="quick_hd_levels">
+        <item>Bajo</item>
+        <item>Medio</item>
+        <item>Alto</item>
     </string-array>
     <string name="quick_effect">Efecto</string>
     <string name="quick_effect_tip">Líneas de barrido o un aspecto de televisor CRT.</string>

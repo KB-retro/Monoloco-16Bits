@@ -17,6 +17,7 @@ FrontendShared g_frontend = {
     .aspect = kMonolocoAspectNative,
     .volume = 100,
     .fast_cores = true,
+    .hd_level = 1,
 };
 
 static pthread_mutex_t s_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -138,6 +139,11 @@ JNIEXPORT void JNICALL BRIDGE(nativeSetVideo)(JNIEnv *env, jclass cls, jint filt
   atomic_store(&g_frontend.effect, Clamp(effect, kEffectCount));
   atomic_store(&g_frontend.scale, Clamp(scale, kScaleCount));
   atomic_store(&g_frontend.original_pixels, original_pixels == JNI_TRUE);
+}
+
+JNIEXPORT void JNICALL BRIDGE(nativeSetHdLevel)(JNIEnv *env, jclass cls, jint level) {
+  (void)env; (void)cls;
+  atomic_store(&g_frontend.hd_level, level < 0 ? 0 : level > 2 ? 2 : level);
 }
 
 JNIEXPORT void JNICALL BRIDGE(nativeSetAspect)(JNIEnv *env, jclass cls, jint aspect) {

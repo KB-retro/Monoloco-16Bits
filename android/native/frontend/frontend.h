@@ -9,7 +9,8 @@ enum {
   kFilterNearest = 0,
   kFilterLinear = 1,
   kFilterSharpLinear = 2,
-  kFilterCount = 3,
+  kFilterReconstruct = 3,  // the second game's upscaler for pre-rendered pixel art
+  kFilterCount = 4,
 };
 
 enum {
@@ -46,6 +47,7 @@ typedef struct FrontendShared {
   _Atomic int presented_frames;
   _Atomic int filter;
   _Atomic int effect;
+  _Atomic int hd_level;          // Reconstruct: 0 low, 1 medium, 2 high
   _Atomic int scale;
   _Atomic bool original_pixels;  // the console's 8:7 pixels, else square
   _Atomic int aspect;            // kMonolocoAspect*

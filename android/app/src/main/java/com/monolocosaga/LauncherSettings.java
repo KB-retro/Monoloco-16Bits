@@ -8,7 +8,9 @@ final class LauncherSettings {
     // Picture: format 0 automatic, 1 original 4:3, 2 16:10, 3 16:9.
     static final String FORMAT = "format", SCALE = "scale", SQUARE_PIXELS = "square_pixels",
         FILTER = "filter", EFFECT = "effect", VOLUME = "volume", FPS = "fps", SLOT = "slot",
-        FAST_CORES = "fast_cores";
+        FAST_CORES = "fast_cores", HD_LEVEL = "hd_level";
+    /** Reconstruct, the HD upscaler, unless the player picked another filter. */
+    static final int DEFAULT_FILTER = 3;
 
     private LauncherSettings() { }
 
@@ -43,10 +45,11 @@ final class LauncherSettings {
     /** Sends every picture and sound setting to the game. */
     static void apply(android.app.Activity activity) {
         try {
-            GameBridge.nativeSetVideo(get(activity, FILTER, 2), get(activity, EFFECT, 0),
+            GameBridge.nativeSetVideo(get(activity, FILTER, DEFAULT_FILTER), get(activity, EFFECT, 0),
                 get(activity, SCALE, 0), get(activity, SQUARE_PIXELS, 0) == 0);
             GameBridge.nativeSetAspect(aspect(activity));
             GameBridge.nativeSetVolume(get(activity, VOLUME, 100));
+            GameBridge.nativeSetHdLevel(get(activity, HD_LEVEL, 1));
             GameBridge.nativeSetFastCores(get(activity, FAST_CORES, 1) == 1);
         } catch (UnsatisfiedLinkError error) {
             android.util.Log.w("Monoloco", "Game library not loaded", error);

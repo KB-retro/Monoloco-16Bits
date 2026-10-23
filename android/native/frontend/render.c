@@ -7,11 +7,19 @@
 #include <android/log.h>
 #include <math.h>
 #include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+// The second game's Reconstruct upscaler (MIT, upstream/game2), used as is
+// and translated to GLSL ES 3 when the renderer starts (ReconstructSource).
+#include "desktop_reconstruct_shader.h"
 
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "Monoloco", __VA_ARGS__)
 
 static GLuint s_program, s_texture, s_vao, s_vbo;
 static GLint s_u_texture, s_u_source, s_u_output, s_u_filter, s_u_effect;
+static GLuint s_hd_program;
+static GLint s_hd_source, s_hd_size, s_hd_output, s_hd_mode, s_hd_strength, s_hd_softness, s_hd_shading;
 static int s_tex_width, s_tex_height;
 static int s_frame_width = 256, s_frame_height = 224;
 static bool s_have_frame;
@@ -81,21 +89,87 @@ static GLuint Compile(GLenum type, const char *source) {
   return shader;
 }
 
+static GLuint Link(const char *vertex_source, const char *fragment_source) {
+  GLuint vertex = Compile(GL_VERTEX_SHADER, vertex_source);
+  GLuint fragment = fragment_source ? Compile(GL_FRAGMENT_SHADER, fragment_source) : 0;
+  GLuint program = 0;
+  if (vertex && fragment) {
+    program = glCreateProgram();
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glLinkProgram(program);
+    GLint ok = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &ok);
+    if (!ok) {
+      LOGE("shader program did not link");
+      glDeleteProgram(program);
+      program = 0;
+    }
+  }
+  if (vertex) glDeleteShader(vertex);
+  if (fragment) glDeleteShader(fragment);
+  return program;
+}
+
+static const char *kReconstructVertex =
+    "#version 300 es\n"
+    "layout(location = 0) in vec2 aPosition;\n"
+    "layout(location = 1) in vec2 aUv;\n"
+    "out vec2 uv;\n"
+    "void main() { uv = aUv; gl_Position = vec4(aPosition, 0.0, 1.0); }\n";
+
+// Replaces every `from` in text (each must occur); returns a new string.
+static char *Replace(char *text, const char *from, const char *to) {
+  if (!text) return NULL;
+  size_t from_length = strlen(from), to_length = strlen(to), count = 0;
+  for (const char *at = strstr(text, from); at; at = strstr(at + from_length, from)) count++;
+  if (!count) {
+    LOGE("Reconstruct shader: \"%s\" not found; upstream changed", from);
+    free(text);
+    return NULL;
+  }
+  char *out = malloc(strlen(text) + count * to_length + 1);
+  char *write = out;
+  const char *read = text;
+  for (const char *at = strstr(read, from); at; at = strstr(read, from)) {
+    memcpy(write, read, (size_t)(at - read));
+    write += at - read;
+    memcpy(write, to, to_length);
+    write += to_length;
+    read = at + from_length;
+  }
+  strcpy(write, read);
+  free(text);
+  return out;
+}
+
+// GLSL 1.20 to GLSL ES 3. The frame is BGRA, so the texel fetch swaps it back.
+static char *ReconstructSource(void) {
+  char *text = strdup(kReconstructFragmentSource);
+  text = Replace(text, "#version 120\n",
+                 "#version 300 es\nprecision highp float;\nprecision highp int;\nout vec4 fragColor;\n");
+  text = Replace(text, "varying vec2 uv;", "in vec2 uv;");
+  text = Replace(text, "texture2D(source, (t + 0.5) / source_size).rgb",
+                 "texture(source, (t + 0.5) / source_size).bgr");
+  text = Replace(text, "gl_FragColor", "fragColor");
+  return text;
+}
+
 bool RenderInit(void) {
-  GLuint vertex = Compile(GL_VERTEX_SHADER, kVertex);
-  GLuint fragment = Compile(GL_FRAGMENT_SHADER, kFragment);
-  if (!vertex || !fragment) return false;
-  s_program = glCreateProgram();
-  glAttachShader(s_program, vertex);
-  glAttachShader(s_program, fragment);
-  glLinkProgram(s_program);
-  glDeleteShader(vertex);
-  glDeleteShader(fragment);
-  GLint ok = 0;
-  glGetProgramiv(s_program, GL_LINK_STATUS, &ok);
-  if (!ok) {
-    LOGE("shader program did not link");
-    return false;
+  s_program = Link(kVertex, kFragment);
+  if (!s_program) return false;
+  // Optional: without it the filter falls back to sharp bilinear.
+  char *hd = ReconstructSource();
+  s_hd_program = hd ? Link(kReconstructVertex, hd) : 0;
+  free(hd);
+  if (s_hd_program) {
+    s_hd_source = glGetUniformLocation(s_hd_program, "source");
+    s_hd_size = glGetUniformLocation(s_hd_program, "source_size");
+    s_hd_output = glGetUniformLocation(s_hd_program, "output_size");
+    s_hd_mode = glGetUniformLocation(s_hd_program, "mode");
+    s_hd_strength = glGetUniformLocation(s_hd_program, "strength");
+    s_hd_softness = glGetUniformLocation(s_hd_program, "softness");
+    s_hd_shading = glGetUniformLocation(s_hd_program, "shading");
   }
   s_u_texture = glGetUniformLocation(s_program, "uTexture");
   s_u_source = glGetUniformLocation(s_program, "uSource");
@@ -126,7 +200,8 @@ void RenderShutdown(void) {
   if (s_vbo) glDeleteBuffers(1, &s_vbo);
   if (s_vao) glDeleteVertexArrays(1, &s_vao);
   if (s_program) glDeleteProgram(s_program);
-  s_texture = s_vbo = s_vao = s_program = 0;
+  if (s_hd_program) glDeleteProgram(s_hd_program);
+  s_texture = s_vbo = s_vao = s_program = s_hd_program = 0;
 }
 
 void RenderUpload(const uint8_t *pixels, int width, int height) {
@@ -151,7 +226,7 @@ void RenderUpload(const uint8_t *pixels, int width, int height) {
 }
 
 void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
-                int scale, bool original_pixels) {
+                int scale, bool original_pixels, int hd_level) {
   glViewport(0, 0, drawable_width, drawable_height);
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -177,12 +252,32 @@ void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
       -x, -y, 0.0f, 1.0f,  x, -y, 1.0f, 1.0f,
       -x,  y, 0.0f, 0.0f,  x,  y, 1.0f, 0.0f,
   };
-  glUseProgram(s_program);
   glBindVertexArray(s_vao);
   glBindBuffer(GL_ARRAY_BUFFER, s_vbo);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof quad, quad);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, s_texture);
+  if (filter == kFilterReconstruct && s_hd_program) {
+    // The upstream defaults are the middle level; it fetches texels itself.
+    static const int kModes[] = {1, 3, 4};
+    static const float kShading[] = {0.3f, 0.6f, 0.6f};
+    int level = hd_level < 0 ? 0 : hd_level > 2 ? 2 : hd_level;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glUseProgram(s_hd_program);
+    glUniform1i(s_hd_source, 0);
+    glUniform2f(s_hd_size, (float)s_frame_width, (float)s_frame_height);
+    glUniform2f(s_hd_output, width, height);
+    glUniform1i(s_hd_mode, kModes[level]);
+    glUniform1f(s_hd_strength, 1.0f);
+    glUniform1f(s_hd_softness, 0.5f);
+    glUniform1f(s_hd_shading, kShading[level]);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+    return;
+  }
+  if (filter == kFilterReconstruct) filter = kFilterSharpLinear;
+  glUseProgram(s_program);
   GLint sampling = filter == kFilterNearest ? GL_NEAREST : GL_LINEAR;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling);

@@ -34,6 +34,9 @@ final class GameBridge {
 
     static native void nativeSetVideo(int filter, int effect, int scale, boolean originalPixels);
 
+    /** Reconstruct (the HD filter): 0 low, 1 medium, 2 high. */
+    static native void nativeSetHdLevel(int level);
+
     /** 0 original 4:3, 1 16:10, 2 16:9. */
     static native void nativeSetAspect(int aspect);
 

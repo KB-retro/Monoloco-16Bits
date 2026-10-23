@@ -188,9 +188,9 @@ def badge(game, top, bottom, accent, scene):
     bbox = d.textbbox((0, 0), str(game), font=numeral)
     outlined_text(img, (w - 60 - (bbox[2] - bbox[0]) - bbox[0], (h - (bbox[3] - bbox[1])) / 2 - bbox[1]),
                   str(game), numeral, (255, 236, 120), (244, 140, 30), (40, 20, 4), 14)
-    label = font(FONT_BOLD, 58)
-    outlined_text(img, (44, 40), "MONOLOCO", label, (255, 255, 255), (220, 232, 228), (10, 20, 18), 6)
-    outlined_text(img, (44, 104), "SAGA", label, (120, 255, 214), (40, 200, 170), (6, 40, 34), 6)
+    # Each game is plain "Monoloco N"; "Saga" belongs only to the launcher's title.
+    label = font(FONT_BOLD, 66)
+    outlined_text(img, (44, 44), "MONOLOCO", label, (255, 255, 255), (220, 232, 228), (10, 20, 18), 6)
     img.save(NODPI / f"game{game}_logo.png")
 
 

@@ -16,6 +16,10 @@ GPL-3 community disassemblies, as recorded by each upstream project. The
 snesrecomp engine is noncommercial: Monoloco Saga is free and must not be
 sold.
 
+The HD filter is the Reconstruct upscaler of DKC2Recomp (MIT), compiled from
+`upstream/game2/runner/desktop_reconstruct_shader.h` and only translated to
+GLSL ES 3 at run time.
+
 The touch-control editor, quick menu and launcher follow KB-retro's own
 NFSU-X and G-Zero 64 Android ports.
 
