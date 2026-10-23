@@ -52,6 +52,9 @@ typedef struct FrontendShared {
   _Atomic int aspect_generation;
   _Atomic int volume;            // percent
   _Atomic int state;             // kGame*
+  _Atomic bool fast_cores;       // every thread on the fastest CPU cluster
+  _Atomic int game_frames;       // guest frames run, for the FPS counter
+  _Atomic int frame_micros;      // recent average CPU time of one guest frame
 } FrontendShared;
 
 extern FrontendShared g_frontend;

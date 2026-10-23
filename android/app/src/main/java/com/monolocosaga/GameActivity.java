@@ -111,13 +111,16 @@ public final class GameActivity extends SDLActivity {
             if (fpsOverlay == null) return;
             int frames;
             try {
-                frames = GameBridge.nativeFrames();
+                frames = GameBridge.nativeGameFrames();
             } catch (UnsatisfiedLinkError error) {
                 return;
             }
             long now = android.os.SystemClock.elapsedRealtime();
             if (fpsLastFrames >= 0 && now > fpsLastTime)
-                fpsOverlay.setText(Math.round((frames - fpsLastFrames) * 1000f / (now - fpsLastTime)) + " FPS");
+                // Game frames per second, and the CPU time one of them takes (over 16.6 ms is too slow).
+                fpsOverlay.setText(String.format(java.util.Locale.ROOT, "%d FPS · %.1f ms",
+                        Math.round((frames - fpsLastFrames) * 1000f / (now - fpsLastTime)),
+                        GameBridge.nativeFrameMicros() / 1000f));
             fpsLastFrames = frames;
             fpsLastTime = now;
             fpsOverlay.postDelayed(this, 1000);

@@ -94,6 +94,8 @@
         <item>Square</item>
     </string-array>
     <string name="quick_fps">FPS counter</string>
+    <string name="quick_fast_cores">Fast cores</string>
+    <string name="quick_fast_cores_tip">Keeps the game on the processor\'s most powerful cores. Turn it off only if the device gets too hot.</string>
     <string name="quick_filter">Filter</string>
     <string name="quick_filter_tip">Sharp smooth keeps pixels crisp without jagged edges when scaling.</string>
     <string-array name="quick_filters">

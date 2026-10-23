@@ -20,7 +20,8 @@ if(NOT MONOLOCO_CORES_ONLY)
     add_library(main SHARED
         frontend/main.c
         frontend/bridge.c
-        frontend/render.c)
+        frontend/render.c
+        frontend/perf.c)
     target_include_directories(main PRIVATE frontend core)
     set_target_properties(main PROPERTIES C_STANDARD 11 C_EXTENSIONS ON)
     target_compile_options(main PRIVATE -O2 -Wall -Wextra -Wno-unused-parameter)

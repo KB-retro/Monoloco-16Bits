@@ -7,7 +7,8 @@ import android.content.SharedPreferences;
 final class LauncherSettings {
     // Picture: format 0 automatic, 1 original 4:3, 2 16:10, 3 16:9.
     static final String FORMAT = "format", SCALE = "scale", SQUARE_PIXELS = "square_pixels",
-        FILTER = "filter", EFFECT = "effect", VOLUME = "volume", FPS = "fps", SLOT = "slot";
+        FILTER = "filter", EFFECT = "effect", VOLUME = "volume", FPS = "fps", SLOT = "slot",
+        FAST_CORES = "fast_cores";
 
     private LauncherSettings() { }
 
@@ -46,6 +47,7 @@ final class LauncherSettings {
                 get(activity, SCALE, 0), get(activity, SQUARE_PIXELS, 0) == 0);
             GameBridge.nativeSetAspect(aspect(activity));
             GameBridge.nativeSetVolume(get(activity, VOLUME, 100));
+            GameBridge.nativeSetFastCores(get(activity, FAST_CORES, 1) == 1);
         } catch (UnsatisfiedLinkError error) {
             android.util.Log.w("Monoloco", "Game library not loaded", error);
         }

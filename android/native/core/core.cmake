@@ -63,7 +63,9 @@ function(monoloco_add_core game)
     # Monoloco glue is held to warnings.
     # Plain char is signed on the platforms upstream validated (x86-64, Apple
     # ARM64) but unsigned on Android ARM64.
-    target_compile_options(${target} PRIVATE -O2 -w -fsigned-char -fno-strict-aliasing)
+    # -O3 and whole-program (Thin)LTO, as the upstream Release builds.
+    target_compile_options(${target} PRIVATE -O3 -w -fsigned-char -fno-strict-aliasing
+        $<$<NOT:$<BOOL:${CORE_CHECK}>>:-flto=thin>)
     set_source_files_properties(
         ${MONOLOCO_CORE_DIR}/core_common.c ${MONOLOCO_CORE_DIR}/game${game}.c
         PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra;-Wno-unused-parameter")
@@ -72,6 +74,7 @@ function(monoloco_add_core game)
         return()
     endif()
     target_link_options(${target} PRIVATE
+        -O3 -flto=thin
         -Wl,--no-undefined
         -Wl,-Bsymbolic
         -Wl,--wrap=Die

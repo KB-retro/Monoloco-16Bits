@@ -99,6 +99,8 @@
         <item>Cuadrado</item>
     </string-array>
     <string name="quick_fps">Contador de FPS</string>
+    <string name="quick_fast_cores">Núcleos rápidos</string>
+    <string name="quick_fast_cores_tip">Mantiene el juego en los núcleos más potentes del procesador. Desactívalo solo si la consola se calienta demasiado.</string>
     <string name="quick_filter">Filtro</string>
     <string name="quick_filter_tip">Nítido suavizado mantiene los píxeles definidos sin dientes de sierra al escalar.</string>
     <string-array name="quick_filters">

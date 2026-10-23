@@ -18,6 +18,15 @@ final class GameBridge {
     /** Frames presented so far, for the FPS counter. */
     static native int nativeFrames();
 
+    /** Guest frames run so far, for the FPS counter. */
+    static native int nativeGameFrames();
+
+    /** Recent average CPU time of one guest frame, in microseconds. */
+    static native int nativeFrameMicros();
+
+    /** Every thread on the fastest CPU cores (some power profiles move games to the little ones). */
+    static native void nativeSetFastCores(boolean on);
+
     static native int nativeState();
 
     /** Why the game could not start or stopped; "" when it did not. */

@@ -3,6 +3,7 @@
 // GameActivity.getArguments(): game number, core library, ROM, save folder.
 #include "frontend.h"
 #include "monoloco_core.h"
+#include "perf.h"
 #include "render.h"
 
 #include <SDL.h>
@@ -199,12 +200,16 @@ int main(int argc, char *argv[]) {
     atomic_store(&g_frontend.state, kGameRunning);
   }
   int aspect_generation = atomic_load(&g_frontend.aspect_generation);
+  PerfStart((int64_t)(1e9 / kGameHz));
+  PerfCheckCores();
 
   Uint64 frequency = SDL_GetPerformanceFrequency();
   Uint64 previous = SDL_GetPerformanceCounter();
   double pending = 0;
   bool was_paused = false;
   bool running = true;
+  double frame_seconds = 0;
+  unsigned core_checks = 0;
   while (running) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -246,6 +251,7 @@ int main(int argc, char *argv[]) {
       // After a stall (background, a slow frame) catch up at most a little.
       pending += elapsed > 0.1 ? 1.0 / kGameHz : elapsed;
       int steps = 0;
+      Uint64 work_start = SDL_GetPerformanceCounter();
       while (pending >= 1.0 / kGameHz && steps < 3) {
         pending -= 1.0 / kGameHz;
         steps++;
@@ -255,7 +261,16 @@ int main(int argc, char *argv[]) {
         }
         QueueAudio();
       }
-      if (steps) RenderUpload(s_core->pixels(), s_core->width(), kMonolocoVideoHeight);
+      if (steps) {
+        RenderUpload(s_core->pixels(), s_core->width(), kMonolocoVideoHeight);
+        double work = (double)(SDL_GetPerformanceCounter() - work_start) / (double)frequency;
+        PerfReport((int64_t)(work * 1e9));
+        // Smoothed CPU time per guest frame: over 16.6 ms the device cannot keep up.
+        frame_seconds += (work / steps - frame_seconds) * 0.05;
+        atomic_store(&g_frontend.frame_micros, (int)(frame_seconds * 1e6));
+        atomic_fetch_add(&g_frontend.game_frames, steps);
+        if (++core_checks % 30 == 0) PerfCheckCores();
+      }
       if (pending > 3.0 / kGameHz) pending = 0;
     }
 

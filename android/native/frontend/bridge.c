@@ -16,6 +16,7 @@ FrontendShared g_frontend = {
     .original_pixels = true,
     .aspect = kMonolocoAspectNative,
     .volume = 100,
+    .fast_cores = true,
 };
 
 static pthread_mutex_t s_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -98,6 +99,21 @@ JNIEXPORT void JNICALL BRIDGE(nativeSetTouch)(JNIEnv *env, jclass cls, jint butt
 JNIEXPORT jint JNICALL BRIDGE(nativeFrames)(JNIEnv *env, jclass cls) {
   (void)env; (void)cls;
   return atomic_load(&g_frontend.presented_frames);
+}
+
+JNIEXPORT jint JNICALL BRIDGE(nativeGameFrames)(JNIEnv *env, jclass cls) {
+  (void)env; (void)cls;
+  return atomic_load(&g_frontend.game_frames);
+}
+
+JNIEXPORT jint JNICALL BRIDGE(nativeFrameMicros)(JNIEnv *env, jclass cls) {
+  (void)env; (void)cls;
+  return atomic_load(&g_frontend.frame_micros);
+}
+
+JNIEXPORT void JNICALL BRIDGE(nativeSetFastCores)(JNIEnv *env, jclass cls, jboolean on) {
+  (void)env; (void)cls;
+  atomic_store(&g_frontend.fast_cores, on == JNI_TRUE);
 }
 
 JNIEXPORT jint JNICALL BRIDGE(nativeState)(JNIEnv *env, jclass cls) {

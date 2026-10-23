@@ -545,6 +545,8 @@ final class QuickMenuDialog {
             @Override public int get() { return activity.fpsOverlayVisible() ? 1 : 0; }
             @Override public void set(int value) { activity.setFpsOverlayVisible(value == 1); }
         });
+        addChoice(R.string.quick_fast_cores, R.string.quick_fast_cores_tip,
+            setting(LauncherSettings.FAST_CORES, 1, R.array.quick_off_on));
     }
 
     private void addFilterRows() {
