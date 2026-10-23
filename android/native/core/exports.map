@@ -1,0 +1,4 @@
+MONOLOCO_CORE_1 {
+    global: monoloco_core;
+    local: *;
+};

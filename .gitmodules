@@ -1,0 +1,13 @@
+[submodule "upstream/game1"]
+	path = upstream/game1
+	url = https://github.com/elliotttate/DKC1Recomp.git
+[submodule "upstream/game2"]
+	path = upstream/game2
+	url = https://github.com/elliotttate/DKC2Recomp.git
+[submodule "upstream/game3"]
+	path = upstream/game3
+	url = https://github.com/elliotttate/DKC3Recomp.git
+[submodule "android/SDL"]
+	path = android/SDL
+	url = https://github.com/libsdl-org/SDL
+	shallow = true

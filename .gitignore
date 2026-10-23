@@ -1,0 +1,29 @@
+# Game data and anything derived from it: never commit
+*.sfc
+*.smc
+*.swc
+*.fig
+*.rom
+*.srm
+*.state
+generated/
+cores/
+*.so
+
+# Android / Gradle
+.gradle/
+.cxx/
+**/build/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+
+# Python / misc
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+.idea/
+.vscode/

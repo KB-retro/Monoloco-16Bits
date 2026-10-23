@@ -1,0 +1,68 @@
+// State shared by the game thread (main.c) and the Java bridge (bridge.c).
+#pragma once
+
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+enum {
+  kFilterNearest = 0,
+  kFilterLinear = 1,
+  kFilterSharpLinear = 2,
+  kFilterCount = 3,
+};
+
+enum {
+  kEffectNone = 0,
+  kEffectScanlines = 1,
+  kEffectCrt = 2,
+  kEffectCount = 3,
+};
+
+enum {
+  kScaleFit = 0,      // largest picture that keeps the proportions
+  kScaleInteger = 1,  // whole multiples of the original lines
+  kScaleStretch = 2,  // whole screen
+  kScaleCount = 3,
+};
+
+enum {
+  kGameLoading = 0,
+  kGameRunning = 1,
+  kGameFailed = 2,
+};
+
+// Requests that must run on the game thread, between frames.
+enum {
+  kRequestNone = 0,
+  kRequestSaveState = 1,
+  kRequestLoadState = 2,
+  kRequestFlush = 3,
+};
+
+typedef struct FrontendShared {
+  _Atomic bool menu_open;
+  _Atomic uint32_t touch_buttons;
+  _Atomic int presented_frames;
+  _Atomic int filter;
+  _Atomic int effect;
+  _Atomic int scale;
+  _Atomic bool original_pixels;  // the console's 8:7 pixels, else square
+  _Atomic int aspect;            // kMonolocoAspect*
+  _Atomic int aspect_generation;
+  _Atomic int volume;            // percent
+  _Atomic int state;             // kGame*
+} FrontendShared;
+
+extern FrontendShared g_frontend;
+
+// Blocks the calling (Java) thread until the game thread ran the request.
+// Returns its result, or false after timeout_ms.
+bool FrontendRequest(int request, const char *path, int timeout_ms);
+// Game thread: runs a pending request, if any.
+void FrontendServiceRequests(void);
+// Implemented by main.c for FrontendServiceRequests.
+bool FrontendRunRequest(int request, const char *path);
+// Last error shown to the player, empty when none.
+const char *FrontendError(void);
+void FrontendSetError(const char *message);
