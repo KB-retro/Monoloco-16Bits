@@ -87,7 +87,7 @@ Las ramas `ci/**` solo comprueban que compila.
 - [snesrecomp](https://github.com/elliotttate/snesrecomp) (PolyForm Noncommercial 1.0.0) y sus
   avisos de terceros.
 - [SDL2](https://github.com/libsdl-org/SDL) (zlib).
-- Port Android, lanzador, menú y controles: **KB-retro** (Patrulla Retro).
+- Port Android, lanzador, menú y controles: **KB-retro**
 
 Los avisos de licencia completos están en [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) y en
 cada submódulo. Los nombres y marcas de los juegos pertenecen a sus propietarios.
