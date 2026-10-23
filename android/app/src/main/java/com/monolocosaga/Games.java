@@ -56,11 +56,11 @@ final class Games {
     static boolean ready(Context context, int game) { return hasRom(context, game) && core(context, game) != null; }
 
     static int selected(Context context) {
-        int game = context.getSharedPreferences("game", Context.MODE_PRIVATE).getInt("selected_game", 1);
+        int game = LauncherSettings.prefs(context).getInt("selected_game", 1);
         return game >= 1 && game <= COUNT ? game : 1;
     }
 
     static void select(Context context, int game) {
-        context.getSharedPreferences("game", Context.MODE_PRIVATE).edit().putInt("selected_game", game).apply();
+        LauncherSettings.prefs(context).edit().putInt("selected_game", game).apply();
     }
 }

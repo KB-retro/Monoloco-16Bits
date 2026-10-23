@@ -9,13 +9,18 @@ final class LauncherSettings {
     static final String FORMAT = "format", SCALE = "scale", SQUARE_PIXELS = "square_pixels",
         FILTER = "filter", EFFECT = "effect", VOLUME = "volume", FPS = "fps", SLOT = "slot",
         FAST_CORES = "fast_cores", HD_LEVEL = "hd_level";
-    /** Reconstruct, the HD upscaler, unless the player picked another filter. */
-    static final int DEFAULT_FILTER = 2;
+    /** Sharp bilinear, full screen and square pixels unless the player picked otherwise. */
+    static final int DEFAULT_FILTER = 2, DEFAULT_SCALE = 2, DEFAULT_SQUARE_PIXELS = 1;
 
     private LauncherSettings() { }
 
+    /**
+     * One file for the three games. Each game runs in the :game process, so the
+     * launcher process must reread it or its stale copy would overwrite changes.
+     */
+    @SuppressWarnings("deprecation")
     static SharedPreferences prefs(Context context) {
-        return context.getSharedPreferences("game", Context.MODE_PRIVATE);
+        return context.getSharedPreferences("game", Context.MODE_MULTI_PROCESS);
     }
 
     static boolean autoStart(Context context) { return prefs(context).getBoolean("auto_start", false); }
@@ -46,7 +51,7 @@ final class LauncherSettings {
     static void apply(android.app.Activity activity) {
         try {
             GameBridge.nativeSetVideo(get(activity, FILTER, DEFAULT_FILTER), get(activity, EFFECT, 0),
-                get(activity, SCALE, 0), get(activity, SQUARE_PIXELS, 0) == 0);
+                get(activity, SCALE, DEFAULT_SCALE), get(activity, SQUARE_PIXELS, DEFAULT_SQUARE_PIXELS) == 0);
             GameBridge.nativeSetAspect(aspect(activity));
             GameBridge.nativeSetVolume(get(activity, VOLUME, 100));
             GameBridge.nativeSetHdLevel(get(activity, HD_LEVEL, 1));

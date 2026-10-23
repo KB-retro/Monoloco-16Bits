@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="android/app/src/main/res/drawable-nodpi/launcher_logo.png" alt="Monoloco Saga" width="420">
+</p>
+
 # Monoloco Saga
 
 Port para Android de las recompilaciones estáticas de una trilogía clásica de plataformas
@@ -13,10 +17,12 @@ y RG477M.
 - **Lanzador:** eliges la entrega y pulsas **Jugar**, **Ajustes** o **Cambiar carpeta**.
   En la carpeta pones tus ROM (USA, sin cabecera o con cabecera de 512 bytes). La app las
   reconoce por su huella SHA-256 y las copia a su carpeta (`Android/data/com.monolocosaga`).
-  Elegir carpeta no arranca el juego. El inicio automático es opcional y se cancela tocando
+  Elegir carpeta no arranca el juego. Los ajustes de imagen y sonido son los mismos para las
+  tres entregas (por defecto, pantalla completa y píxel cuadrado). El inicio automático es opcional y se cancela tocando
   la pantalla o pulsando el mando.
 - **Menú rápido** con el botón Atrás: pausa el juego. Incluye imagen (formato, filtro, efecto,
-  proporción de píxel), sonido, guardado y carga rápida, controles táctiles y contador de FPS.
+  proporción de píxel; filtros Nítido, Suave, Nítido suavizado, HD, xBR, CRT Lottes y
+  CRT Hyllian), sonido, guardado y carga rápida, controles táctiles y contador de FPS.
 - **Controles táctiles** con editor (mover, cambiar tamaño, cuadrícula y preajustes en XML).
   Se ocultan solos si hay un mando conectado.
 

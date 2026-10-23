@@ -21,6 +21,7 @@ if(NOT MONOLOCO_CORES_ONLY)
         frontend/main.c
         frontend/bridge.c
         frontend/render.c
+        frontend/shaders.c
         frontend/perf.c)
     # The Reconstruct shader header comes straight from the second game (MIT).
     target_include_directories(main PRIVATE frontend core ${MONOLOCO_UPSTREAM}/game2/runner)

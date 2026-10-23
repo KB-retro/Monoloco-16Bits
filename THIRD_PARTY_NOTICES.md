@@ -20,6 +20,11 @@ The HD filter is the Reconstruct upscaler of DKC2Recomp (MIT), compiled from
 `upstream/game2/runner/desktop_reconstruct_shader.h` and only translated to
 GLSL ES 3 at run time.
 
+The xBR, CRT-Lottes and CRT-Hyllian filters (`android/native/frontend/shaders.c`)
+are ported from libretro's glsl-shaders: Hyllian's xBR-lv2 and CRT shaders
+(MIT, copyright Hyllian, notices kept in the source), Timothy Lottes' CRT
+shader (public domain) and hunterk's mask collection (public domain).
+
 The touch-control editor, quick menu and launcher follow KB-retro's own
 NFSU-X and G-Zero 64 Android ports.
 

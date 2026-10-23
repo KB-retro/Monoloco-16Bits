@@ -13,6 +13,7 @@
 // The second game's Reconstruct upscaler (MIT, upstream/game2), used as is
 // and translated to GLSL ES 3 when the renderer starts (ReconstructSource).
 #include "desktop_reconstruct_shader.h"
+#include "shaders.h"
 
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "Monoloco", __VA_ARGS__)
 
@@ -20,6 +21,12 @@ static GLuint s_program, s_texture, s_vao, s_vbo;
 static GLint s_u_texture, s_u_source, s_u_output, s_u_filter, s_u_effect;
 static GLuint s_hd_program;
 static GLint s_hd_source, s_hd_size, s_hd_output, s_hd_mode, s_hd_strength, s_hd_softness, s_hd_shading;
+// xBR, CRT-Lottes and CRT-Hyllian (shaders.c), in filter order.
+typedef struct {
+  GLuint program;
+  GLint texture, source, output;
+} ExtraFilter;
+static ExtraFilter s_extra[kFilterCount - kFilterXbr];
 static int s_tex_width, s_tex_height;
 static int s_frame_width = 256, s_frame_height = 224;
 static bool s_have_frame;
@@ -171,6 +178,16 @@ bool RenderInit(void) {
     s_hd_softness = glGetUniformLocation(s_hd_program, "softness");
     s_hd_shading = glGetUniformLocation(s_hd_program, "shading");
   }
+  // Optional too: a filter that does not build falls back to sharp bilinear.
+  const char *const extra[] = {kXbrFragment, kCrtLottesFragment, kCrtHyllianFragment};
+  for (int i = 0; i < kFilterCount - kFilterXbr; i++) {
+    ExtraFilter *filter = &s_extra[i];
+    filter->program = Link(kVertex, extra[i]);
+    if (!filter->program) continue;
+    filter->texture = glGetUniformLocation(filter->program, "uTexture");
+    filter->source = glGetUniformLocation(filter->program, "uSource");
+    filter->output = glGetUniformLocation(filter->program, "uOutput");
+  }
   s_u_texture = glGetUniformLocation(s_program, "uTexture");
   s_u_source = glGetUniformLocation(s_program, "uSource");
   s_u_output = glGetUniformLocation(s_program, "uOutput");
@@ -201,6 +218,10 @@ void RenderShutdown(void) {
   if (s_vao) glDeleteVertexArrays(1, &s_vao);
   if (s_program) glDeleteProgram(s_program);
   if (s_hd_program) glDeleteProgram(s_hd_program);
+  for (int i = 0; i < kFilterCount - kFilterXbr; i++) {
+    if (s_extra[i].program) glDeleteProgram(s_extra[i].program);
+    s_extra[i].program = 0;
+  }
   s_texture = s_vbo = s_vao = s_program = s_hd_program = 0;
 }
 
@@ -276,7 +297,20 @@ void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
     glBindVertexArray(0);
     return;
   }
-  if (filter == kFilterReconstruct) filter = kFilterSharpLinear;
+  if (filter >= kFilterXbr && s_extra[filter - kFilterXbr].program) {
+    // These pick their own texels, and the CRT ones replace the effects.
+    const ExtraFilter *extra = &s_extra[filter - kFilterXbr];
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glUseProgram(extra->program);
+    glUniform1i(extra->texture, 0);
+    glUniform2f(extra->source, (float)s_frame_width, (float)s_frame_height);
+    glUniform2f(extra->output, width, height);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+    return;
+  }
+  if (filter >= kFilterReconstruct) filter = kFilterSharpLinear;
   glUseProgram(s_program);
   GLint sampling = filter == kFilterNearest ? GL_NEAREST : GL_LINEAR;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling);

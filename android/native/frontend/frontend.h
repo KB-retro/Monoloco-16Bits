@@ -10,7 +10,10 @@ enum {
   kFilterLinear = 1,
   kFilterSharpLinear = 2,
   kFilterReconstruct = 3,  // the second game's upscaler for pre-rendered pixel art
-  kFilterCount = 4,
+  kFilterXbr = 4,          // Hyllian's xBR: smooth diagonals, sharp edges
+  kFilterCrtLottes = 5,
+  kFilterCrtHyllian = 6,
+  kFilterCount = 7,
 };
 
 enum {

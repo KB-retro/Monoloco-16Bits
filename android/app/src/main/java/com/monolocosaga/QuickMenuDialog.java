@@ -537,9 +537,9 @@ final class QuickMenuDialog {
         addChoice(R.string.quick_format, R.string.quick_format_tip,
             setting(LauncherSettings.FORMAT, 0, R.array.quick_formats));
         addChoice(R.string.quick_scale, R.string.quick_scale_tip,
-            setting(LauncherSettings.SCALE, 0, R.array.quick_scales));
+            setting(LauncherSettings.SCALE, LauncherSettings.DEFAULT_SCALE, R.array.quick_scales));
         addChoice(R.string.quick_pixels, R.string.quick_pixels_tip,
-            setting(LauncherSettings.SQUARE_PIXELS, 0, R.array.quick_pixel_shapes));
+            setting(LauncherSettings.SQUARE_PIXELS, LauncherSettings.DEFAULT_SQUARE_PIXELS, R.array.quick_pixel_shapes));
         addChoice(R.string.quick_fps, 0, new Choice() {
             @Override public String[] values() { return array(R.array.quick_off_on); }
             @Override public int get() { return activity.fpsOverlayVisible() ? 1 : 0; }
