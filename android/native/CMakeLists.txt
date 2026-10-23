@@ -32,3 +32,13 @@ include(core/core.cmake)
 add_subdirectory(core/game1)
 add_subdirectory(core/game2)
 add_subdirectory(core/game3)
+
+# Gradle only builds library targets: make the frontend wait for the compile
+# checks so CI really compiles the three cores (nothing of them is linked).
+if(NOT MONOLOCO_CORES_ONLY)
+    foreach(game 1 2 3)
+        if(TARGET monoloco_game${game}_check)
+            add_dependencies(main monoloco_game${game}_check)
+        endif()
+    endforeach()
+endif()

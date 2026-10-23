@@ -49,7 +49,7 @@ val buildCommit = providers.exec {
 }.standardOutput.asText.map { it.trim() }
 
 // SDL's Java half must match the SDL2 the frontend links (android/SDL, same release).
-val prepareSdlJava by tasks.registering {
+val prepareSdlJava = tasks.register("prepareSdlJava") {
     val source = file("../SDL/android-project/app/src/main/java")
     val output = layout.buildDirectory.dir("generated/sdl-java")
     inputs.dir(source)

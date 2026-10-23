@@ -8,7 +8,6 @@
         android:appCategory="game"
         android:localeConfig="@xml/locales_config"
         android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher"
-        android:extractNativeLibs="true"
         android:allowBackup="false" android:hasFragileUserData="true" android:enableOnBackInvokedCallback="false">
         <activity android:name=".LauncherActivity" android:exported="true"
             android:screenOrientation="sensorLandscape">
