@@ -78,6 +78,10 @@ jobs:
               echo "::notice::No MONOLOCO_ROM${game}_URL secret: game $game is not included."
               continue
             fi
+            # Dropbox share links open a web page; dl=1 downloads the file itself.
+            case "$url" in
+              *dropbox.com*) url="${url//dl=0/dl=1}"; [[ "$url" == *dl=1* ]] || url="$url$([[ "$url" == *\?* ]] && echo '&' || echo '?')dl=1" ;;
+            esac
             file="$RUNNER_TEMP/roms/game$game.sfc"
             curl -fsSL --retry 3 -o "$file" "$url" || { echo "::error::Cannot download MONOLOCO_ROM${game}_URL"; exit 1; }
             echo "monoloco.rom$game=$file" >> local.properties
