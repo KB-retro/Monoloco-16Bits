@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">Monoloco Saga</string>
     <string name="game1_title" translatable="false">Monoloco 1</string>
-    <string name="game1_subtitle">La isla de la selva</string>
+    <string name="game1_subtitle">La gran selva</string>
     <string name="game2_title" translatable="false">Monoloco 2</string>
     <string name="game2_subtitle">La isla de los piratas</string>
     <string name="game3_title" translatable="false">Monoloco 3</string>

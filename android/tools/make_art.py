@@ -156,7 +156,7 @@ ART = Path(__file__).resolve().parents[1] / "art"
 # KB-retro's cover art: the icon card on the left, the poster on the right.
 COVER = ART / "cover-source.jpg"
 LOGO_CUT = ART / "logo-cut.png"       # its logo, cut from the sky behind it
-ICON = (60, 230, 755, 925)            # logo, explorer and aviator from the card
+ICON = (815, 400, 1500, 1085)         # the poster's heroes, behind the centred logo
 SCENE_BACKDROP = (880, 380, 1500, 668)  # the poster's islands, waterfalls and sunset
 # One hero per game, facing the number; the explorer is mirrored to look right.
 SCENES = {1: ((270, 570, 710, 820), False), 2: ((135, 560, 575, 810), True), 3: ((982, 660, 1382, 887), False)}
@@ -221,29 +221,29 @@ def backdrop():
 
 
 def icons():
-    """The cover's icon card; its middle sits in the adaptive icon's safe zone over a blurred copy."""
+    """The logo centred in the adaptive icon's safe zone, over the poster's heroes."""
     densities = {"mdpi": 1, "hdpi": 1.5, "xhdpi": 2, "xxhdpi": 3, "xxxhdpi": 4}
     art = cover_crop(ICON).convert("RGBA")
+    cut = Image.open(LOGO_CUT).convert("RGBA")
     for name, scale in densities.items():
         folder = ROOT / f"mipmap-{name}"
         folder.mkdir(parents=True, exist_ok=True)
         adaptive = int(108 * scale)
-        background = art.resize((adaptive, adaptive), Image.LANCZOS).filter(ImageFilter.GaussianBlur(scale * 4))
+        background = art.resize((adaptive, adaptive), Image.LANCZOS)
         background.save(folder / "ic_launcher_background.png")
-        inner = int(adaptive * 0.70)
-        sharp = art.resize((inner, inner), Image.LANCZOS)
-        feather = Image.new("L", (inner, inner), 0)
-        edge = max(2, inner // 24)
-        ImageDraw.Draw(feather).rectangle((edge, edge, inner - edge, inner - edge), fill=255)
-        sharp.putalpha(feather.filter(ImageFilter.GaussianBlur(edge / 2)))
         foreground = Image.new("RGBA", (adaptive, adaptive), (0, 0, 0, 0))
-        foreground.alpha_composite(sharp, ((adaptive - inner) // 2, (adaptive - inner) // 2))
+        mark = cut.copy()
+        mark.thumbnail((int(adaptive * 0.62), int(adaptive * 0.62)), Image.LANCZOS)
+        foreground.alpha_composite(mark, ((adaptive - mark.width) // 2, (adaptive - mark.height) // 2))
         foreground.save(folder / "ic_launcher_foreground.png")
         legacy = int(48 * scale)
         mask = Image.new("L", (legacy, legacy), 0)
         ImageDraw.Draw(mask).rounded_rectangle((0, 0, legacy - 1, legacy - 1), radius=legacy // 6, fill=255)
+        full = Image.alpha_composite(background, foreground)
+        inset = int(adaptive * 0.12)  # the legacy icon shows about what the adaptive one does
+        full = full.crop((inset, inset, adaptive - inset, adaptive - inset)).resize((legacy, legacy), Image.LANCZOS)
         icon = Image.new("RGBA", (legacy, legacy), (0, 0, 0, 0))
-        icon.paste(art.resize((legacy, legacy), Image.LANCZOS), (0, 0), mask)
+        icon.paste(full, (0, 0), mask)
         icon.save(folder / "ic_launcher.png")
 
 
