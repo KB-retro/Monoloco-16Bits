@@ -213,7 +213,10 @@ public final class LauncherActivity extends Activity {
         }
         boolean ready = hasCore && hasRom;
         play.setVisibility(ready ? View.VISIBLE : View.GONE);
-        chooseButton.setText(hasRom ? R.string.launcher_change_folder : R.string.launcher_choose);
+        boolean anyRom = false;
+        for (int g = 1; g <= Games.COUNT; g++) anyRom |= Games.hasRom(this, g);
+        chooseButton.setText(anyRom ? R.string.launcher_change_folder : R.string.launcher_choose);
+        showFolderName();
         String message = importMessage;
         if (crash != null) message = getString(R.string.launcher_crashed, crash);
         if (ready) {
@@ -234,6 +237,23 @@ public final class LauncherActivity extends Activity {
         if (getCurrentFocus() == null || getCurrentFocus() == play || getCurrentFocus() == chooseButton) {
             focus.requestFocus();
         }
+    }
+
+    /** Under the folder button: which folder the three games come from. */
+    private void showFolderName() {
+        TextView name = findViewById(R.id.folder_name);
+        Uri tree = savedFolder();
+        String label = null;
+        if (tree != null) {
+            try {
+                String id = android.provider.DocumentsContract.getTreeDocumentId(tree);
+                label = id.substring(id.indexOf(':') + 1);
+                if (label.isEmpty()) label = id;
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        name.setText(label != null ? getString(R.string.launcher_folder_name, label) : "");
+        name.setVisibility(label != null ? View.VISIBLE : View.GONE);
     }
 
     /** The reason the last session of this game stopped, once. */

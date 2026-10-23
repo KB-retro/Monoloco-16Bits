@@ -9,12 +9,13 @@
     <string name="game3_subtitle">Las tierras del norte</string>
 
     <string name="launcher_platform">TRILOGÍA DE PLATAFORMAS · 16 BITS · ANDROID</string>
-    <string name="launcher_choose">Elegir carpeta</string>
-    <string name="launcher_change_folder">Cambiar carpeta</string>
+    <string name="launcher_choose">Elegir carpeta de las ROM</string>
+    <string name="launcher_change_folder">Cambiar carpeta de las ROM</string>
+    <string name="launcher_folder_name">Los tres juegos: %1$s</string>
     <string name="launcher_play">JUGAR  ›</string>
     <string name="launcher_settings">Ajustes</string>
     <string name="launcher_no_core">Esta versión de la app no incluye este juego. Importa su núcleo desde la carpeta (libmonoloco_gameN.so, hecho en tu PC) o usa una APK compilada con tu ROM.</string>
-    <string name="launcher_no_rom">Elige una sola vez la carpeta con las ROM de los tres juegos (EE. UU.). La app las reconoce aunque tengan otro nombre y la recuerda: si luego añades una ROM a esa carpeta, se importa sola.</string>
+    <string name="launcher_no_rom">Falta la ROM de este juego. Con el botón de la carpeta, debajo de la lista, se eligen una sola vez las ROM de los tres juegos (EE. UU.). La app las reconoce aunque tengan otro nombre y la recuerda: si luego añades una ROM a esa carpeta, se importa sola.</string>
     <string name="launcher_state_ready">✓ Listo</string>
     <string name="launcher_state_no_rom">Falta la ROM</string>
     <string name="launcher_state_no_core">No incluido en esta versión</string>

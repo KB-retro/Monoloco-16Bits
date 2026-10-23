@@ -5,12 +5,13 @@
     <string name="game3_subtitle">The northern lands</string>
 
     <string name="launcher_platform">16-BIT PLATFORMER TRILOGY · ANDROID</string>
-    <string name="launcher_choose">Choose folder</string>
-    <string name="launcher_change_folder">Change folder</string>
+    <string name="launcher_choose">Choose the ROM folder</string>
+    <string name="launcher_change_folder">Change the ROM folder</string>
+    <string name="launcher_folder_name">All three games: %1$s</string>
     <string name="launcher_play">PLAY  ›</string>
     <string name="launcher_settings">Settings</string>
     <string name="launcher_no_core">This version of the app does not include this game. Import its core from the folder (libmonoloco_gameN.so, built on your PC) or use an APK built with your ROM.</string>
-    <string name="launcher_no_rom">Choose once the folder with the ROMs of the three games (USA). The app recognises them whatever their names and remembers it: a ROM added to that folder later comes in on its own.</string>
+    <string name="launcher_no_rom">This game\'s ROM is missing. The folder button under the list picks the ROMs of the three games at once (USA). The app recognises them whatever their names and remembers it: a ROM added to that folder later comes in on its own.</string>
     <string name="launcher_state_ready">✓ Ready</string>
     <string name="launcher_state_no_rom">ROM missing</string>
     <string name="launcher_state_no_core">Not in this version</string>
