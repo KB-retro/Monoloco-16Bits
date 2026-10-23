@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Draws Monoloco Saga's own artwork: launcher icon, logo, backdrop, the three
-episode badges and the touch buttons (the neon-turquoise circle of KB-retro's
-other ports). Nothing here comes from the games.
+"""Draws Monoloco Saga's artwork: the launcher icon, logo, backdrop and the
+three game badges come from KB-retro's cover art (android/art/: its scenery
+and logo only, never its characters); the touch buttons are drawn here with the
+neon-turquoise circle of KB-retro's other ports. Nothing comes from the games.
 
     python3 android/tools/make_art.py
 """
@@ -152,176 +153,94 @@ def outlined_text(draw_image, xy, text, f, fill_top, fill_bottom, outline, strok
     draw_image.paste(gradient, (0, 0), mask)
 
 
+ART = Path(__file__).resolve().parents[1] / "art"
+# From KB-retro's cover art: only its scenery (characters and birds left out)
+# and its logo, cut from the sky behind it.
+SCENERY = ART / "scenery.png"
+LOGO_CUT = ART / "logo-cut.png"
+SCENE_BACKDROP = (120, 10, 599, 240)  # skull island, waterfall, sea and sunset
+SCENE_ICON = (150, 20, 599, 240)
+SCENES = {1: (0, 40, 330, 228), 2: (330, 90, 599, 240), 3: (120, 10, 400, 170)}
+
+
+def poster_crop(box):
+    return Image.open(SCENERY).convert("RGB").crop(box)
+
+
+def cover_fit(image, size):
+    """Scales to cover size and crops the middle."""
+    w, h = size
+    scale = max(w / image.width, h / image.height)
+    image = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
+    left, top = (image.width - w) // 2, (image.height - h) // 2
+    return image.crop((left, top, left + w, top + h))
+
+
 def logo():
-    w, h = 1400, 340
-    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    big = font(FONT_BOLD, 190)
-    d = ImageDraw.Draw(img)
-    text = "MONOLOCO"
-    bbox = d.textbbox((0, 0), text, font=big)
-    x = (w - (bbox[2] - bbox[0])) / 2 - bbox[0]
-    outlined_text(img, (x, 10), text, big, (255, 226, 92), (240, 128, 24), (52, 26, 6), 14)
-    small = font(FONT_BOLD, 96)
-    text = "S A G A"
-    bbox = d.textbbox((0, 0), text, font=small)
-    x = (w - (bbox[2] - bbox[0])) / 2 - bbox[0]
-    outlined_text(img, (x, 222), text, small, (120, 255, 214), (30, 190, 160), (6, 40, 34), 9)
-    img = img.crop(img.getbbox())
-    img.save(NODPI / "launcher_logo.png")
+    Image.open(LOGO_CUT).convert("RGBA").save(NODPI / "launcher_logo.png")
 
 
-def badge(game, top, bottom, accent, scene):
+def badge(game, accent):
     w, h = 704, 400
+    scene = cover_fit(poster_crop(SCENES[game]), (w, h)).filter(ImageFilter.GaussianBlur(1.2)).convert("RGBA")
+    # Darker on the left, where the name sits.
+    shade = Image.new("RGBA", (w, h))
+    sd = ImageDraw.Draw(shade)
+    for x in range(w):
+        sd.line([(x, 0), (x, h)], fill=(10, 16, 8, int(150 * max(0, 1 - x / (w * 0.7)))))
+    scene.alpha_composite(shade)
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     mask = Image.new("L", (w, h), 0)
     ImageDraw.Draw(mask).rounded_rectangle((8, 8, w - 8, h - 8), radius=40, fill=255)
-    bg = Image.new("RGBA", (w, h))
-    bd = ImageDraw.Draw(bg)
-    for y in range(h):
-        t = y / h
-        bd.line([(0, y), (w, y)], fill=tuple(int(top[c] + (bottom[c] - top[c]) * t) for c in range(3)) + (255,))
-    scene(bd, w, h)
-    img.paste(bg, (0, 0), mask)
-    ImageDraw.Draw(img).rounded_rectangle((8, 8, w - 8, h - 8), radius=40, outline=accent + (255,), width=10)
+    img.paste(scene, (0, 0), mask)
+    ImageDraw.Draw(img).rounded_rectangle((8, 8, w - 8, h - 8), radius=40, outline=(92, 52, 22, 255), width=14)
+    ImageDraw.Draw(img).rounded_rectangle((15, 15, w - 15, h - 15), radius=34, outline=accent + (255,), width=4)
+    # "MONOLOCO" in the logo's own letters (its top half), plus the number.
+    cut = Image.open(LOGO_CUT).convert("RGBA")
+    word = cut.crop((0, 0, cut.width, int(cut.height * 0.47)))
+    fade = Image.new("L", word.size, 255)  # soften the cut above the "SAGA" plank
+    for y in range(word.height - 14, word.height):
+        ImageDraw.Draw(fade).line([(0, y), (word.width, y)], fill=int(255 * (word.height - y) / 14))
+    word.putalpha(ImageChops.multiply(word.getchannel("A"), fade))
+    word.thumbnail((420, 200))
+    img.alpha_composite(word, (30, 34))
     numeral = font(FONT_BOLD, 270)
     d = ImageDraw.Draw(img)
     bbox = d.textbbox((0, 0), str(game), font=numeral)
-    outlined_text(img, (w - 60 - (bbox[2] - bbox[0]) - bbox[0], (h - (bbox[3] - bbox[1])) / 2 - bbox[1]),
-                  str(game), numeral, (255, 236, 120), (244, 140, 30), (40, 20, 4), 14)
-    # Each game is plain "Monoloco N"; "Saga" belongs only to the launcher's title.
-    label = font(FONT_BOLD, 66)
-    outlined_text(img, (44, 44), "MONOLOCO", label, (255, 255, 255), (220, 232, 228), (10, 20, 18), 6)
+    outlined_text(img, (w - 60 - (bbox[2] - bbox[0]) - bbox[0], (h - (bbox[3] - bbox[1])) / 2 - bbox[1] + 20),
+                  str(game), numeral, (255, 226, 92), (240, 128, 24), (60, 30, 8), 16)
     img.save(NODPI / f"game{game}_logo.png")
-
-
-def jungle_scene(d, w, h):
-    rng = random.Random(1)
-    d.ellipse((w * 0.08, h * 0.45, w * 0.38, h * 0.95), fill=(255, 214, 110, 255))
-    for layer, color in enumerate([(30, 96, 56), (18, 70, 40), (10, 46, 26)]):
-        base = h * (0.62 + layer * 0.1)
-        points = [(0, h)]
-        for x in range(0, w + 40, 40):
-            points.append((x, base - 40 * math.sin(x / 70 + layer) - rng.randint(0, 20)))
-        points.append((w, h))
-        d.polygon(points, fill=color + (255,))
-    for px in (w * 0.18, w * 0.5):
-        d.line([(px, h), (px + 20, h * 0.35)], fill=(12, 34, 20, 255), width=14)
-        for a in range(0, 360, 50):
-            r = math.radians(a)
-            d.line([(px + 20, h * 0.35), (px + 20 + 90 * math.cos(r), h * 0.35 + 40 * math.sin(r) + 20)],
-                   fill=(14, 60, 30, 255), width=16)
-
-
-def pirate_scene(d, w, h):
-    d.ellipse((w * 0.1, h * 0.18, w * 0.3, h * 0.48), fill=(250, 240, 210, 255))
-    for i in range(6):
-        y = h * (0.7 + i * 0.05)
-        d.rectangle((0, y, w, h), fill=(40 + i * 6, 30 + i * 4, 90 - i * 8, 255))
-    d.polygon([(w * 0.12, h * 0.72), (w * 0.52, h * 0.72), (w * 0.46, h * 0.84), (w * 0.18, h * 0.84)],
-              fill=(46, 22, 16, 255))
-    d.line([(w * 0.32, h * 0.72), (w * 0.32, h * 0.3)], fill=(46, 22, 16, 255), width=10)
-    d.polygon([(w * 0.33, h * 0.32), (w * 0.47, h * 0.5), (w * 0.33, h * 0.62)], fill=(214, 200, 176, 255))
-
-
-def north_scene(d, w, h):
-    rng = random.Random(3)
-    for i in range(40):
-        x, y = rng.randint(0, w), rng.randint(0, int(h * 0.5))
-        d.ellipse((x, y, x + 5, y + 5), fill=(240, 250, 255, 255))
-    for layer, color in enumerate([(150, 190, 220), (100, 150, 196), (60, 104, 156)]):
-        base = h * (0.55 + layer * 0.12)
-        points = [(0, h)]
-        for x in range(0, w + 80, 80):
-            peak = base - (90 if (x // 80 + layer) % 2 == 0 else 20)
-            points.append((x, peak))
-        points.append((w, h))
-        d.polygon(points, fill=color + (255,))
 
 
 def backdrop():
     w, h = 1920, 1080
-    img = Image.new("RGB", (w, h))
-    d = ImageDraw.Draw(img)
-    for y in range(h):
-        t = y / h
-        d.line([(0, y), (w, y)], fill=(int(14 + 40 * (1 - t)), int(52 + 60 * (1 - t)), int(40 + 30 * (1 - t))))
-    sun = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    ImageDraw.Draw(sun).ellipse((w * 0.62, h * 0.12, w * 0.82, h * 0.48), fill=(255, 214, 120, 200))
-    img.paste(sun.filter(ImageFilter.GaussianBlur(40)), (0, 0), sun.filter(ImageFilter.GaussianBlur(40)))
-    rng = random.Random(7)
-    for layer, color in enumerate([(26, 84, 50), (16, 62, 38), (8, 40, 24), (4, 22, 14)]):
-        base = h * (0.5 + layer * 0.12)
-        points = [(0, h)]
-        for x in range(0, w + 60, 60):
-            points.append((x, base - 70 * math.sin(x / 180 + layer * 1.7) - rng.randint(0, 30)))
-        points.append((w, h))
-        d.polygon(points, fill=color)
-        for _ in range(3 + layer):
-            px = rng.randint(0, w)
-            top = base - rng.randint(200, 380)
-            d.line([(px, base + 40), (px + 30, top)], fill=tuple(max(0, c - 6) for c in color), width=18 + layer * 4)
-            for a in range(-20, 200, 34):
-                r = math.radians(a)
-                d.line([(px + 30, top), (px + 30 + 170 * math.cos(r), top - 60 * math.sin(r) + 70)],
-                       fill=tuple(max(0, c - 4) for c in color), width=22 + layer * 4)
-    vines = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    vd = ImageDraw.Draw(vines)
-    for i in range(9):
-        x = rng.randint(0, w)
-        length = rng.randint(200, 520)
-        vd.line([(x, 0), (x + rng.randint(-30, 30), length)], fill=(6, 30, 18, 230), width=8)
-        for y in range(20, length, 46):
-            vd.ellipse((x - 18, y, x + 18, y + 22), fill=(10, 56, 30, 230))
-    img.paste(vines, (0, 0), vines)
-    img.save(NODPI / "launcher_backdrop.jpg", quality=88)
-
-
-def monkey_icon(size):
-    """The launcher icon: a cheeky monkey face on a jungle-green disc."""
-    s = size
-    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    brown, light, dark = (120, 70, 34, 255), (238, 196, 150, 255), (40, 20, 8, 255)
-    d.ellipse((s * 0.12, s * 0.34, s * 0.34, s * 0.58), fill=brown)
-    d.ellipse((s * 0.66, s * 0.34, s * 0.88, s * 0.58), fill=brown)
-    d.ellipse((s * 0.17, s * 0.39, s * 0.29, s * 0.53), fill=light)
-    d.ellipse((s * 0.71, s * 0.39, s * 0.83, s * 0.53), fill=light)
-    d.ellipse((s * 0.22, s * 0.2, s * 0.78, s * 0.78), fill=brown)
-    d.pieslice((s * 0.3, s * 0.22, s * 0.7, s * 0.5), 180, 360, fill=(90, 50, 22, 255))
-    d.ellipse((s * 0.3, s * 0.38, s * 0.5, s * 0.6), fill=light)
-    d.ellipse((s * 0.5, s * 0.38, s * 0.7, s * 0.6), fill=light)
-    d.ellipse((s * 0.3, s * 0.5, s * 0.7, s * 0.76), fill=light)
-    d.ellipse((s * 0.37, s * 0.44, s * 0.45, s * 0.53), fill=dark)
-    d.ellipse((s * 0.55, s * 0.44, s * 0.63, s * 0.53), fill=dark)
-    d.ellipse((s * 0.39, s * 0.455, s * 0.415, s * 0.48), fill=(255, 255, 255, 255))
-    d.ellipse((s * 0.57, s * 0.455, s * 0.595, s * 0.48), fill=(255, 255, 255, 255))
-    d.ellipse((s * 0.45, s * 0.57, s * 0.48, s * 0.6), fill=dark)
-    d.ellipse((s * 0.52, s * 0.57, s * 0.55, s * 0.6), fill=dark)
-    d.arc((s * 0.4, s * 0.58, s * 0.6, s * 0.71), 20, 160, fill=dark, width=max(2, s // 64))
-    return img
+    scene = cover_fit(poster_crop(SCENE_BACKDROP), (w, h)).filter(ImageFilter.GaussianBlur(2))
+    scene.save(NODPI / "launcher_backdrop.jpg", quality=88)
 
 
 def icons():
+    """The logo over the island scenery; the logo stays inside the adaptive icon's safe zone."""
     densities = {"mdpi": 1, "hdpi": 1.5, "xhdpi": 2, "xxhdpi": 3, "xxxhdpi": 4}
+    cut = Image.open(LOGO_CUT).convert("RGBA")
     for name, scale in densities.items():
         folder = ROOT / f"mipmap-{name}"
         folder.mkdir(parents=True, exist_ok=True)
         adaptive = int(108 * scale)
-        background = Image.new("RGBA", (adaptive, adaptive))
-        bd = ImageDraw.Draw(background)
-        for y in range(adaptive):
-            t = y / adaptive
-            bd.line([(0, y), (adaptive, y)], fill=(int(24 + 20 * (1 - t)), int(110 + 50 * (1 - t)), int(70 + 30 * (1 - t)), 255))
+        background = cover_fit(poster_crop(SCENE_ICON), (adaptive, adaptive)).filter(
+            ImageFilter.GaussianBlur(scale * 0.8)).convert("RGBA")
         background.save(folder / "ic_launcher_background.png")
         foreground = Image.new("RGBA", (adaptive, adaptive), (0, 0, 0, 0))
-        face = monkey_icon(int(adaptive * 0.62))
-        foreground.alpha_composite(face, ((adaptive - face.size[0]) // 2, (adaptive - face.size[1]) // 2))
+        mark = cut.copy()
+        mark.thumbnail((int(adaptive * 0.64), int(adaptive * 0.64)), Image.LANCZOS)
+        foreground.alpha_composite(mark, ((adaptive - mark.width) // 2, (adaptive - mark.height) // 2))
         foreground.save(folder / "ic_launcher_foreground.png")
         legacy = int(48 * scale)
         icon = Image.new("RGBA", (legacy, legacy), (0, 0, 0, 0))
         mask = Image.new("L", (legacy, legacy), 0)
-        ImageDraw.Draw(mask).ellipse((0, 0, legacy - 1, legacy - 1), fill=255)
-        full = Image.alpha_composite(background, foreground).resize((legacy, legacy), Image.LANCZOS)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0, legacy - 1, legacy - 1), radius=legacy // 6, fill=255)
+        full = Image.alpha_composite(background, foreground)
+        inset = int(adaptive * 0.14)  # the legacy icon shows about what the adaptive one does
+        full = full.crop((inset, inset, adaptive - inset, adaptive - inset)).resize((legacy, legacy), Image.LANCZOS)
         icon.paste(full, (0, 0), mask)
         icon.save(folder / "ic_launcher.png")
 
@@ -336,9 +255,9 @@ def main():
     touch_pill("start", "START")
     touch_dpad()
     logo()
-    badge(1, (60, 150, 90), (14, 60, 32), (255, 200, 60), jungle_scene)
-    badge(2, (70, 40, 110), (20, 16, 50), (240, 90, 70), pirate_scene)
-    badge(3, (120, 170, 220), (30, 60, 110), (180, 240, 255), north_scene)
+    badge(1, (255, 200, 60))
+    badge(2, (255, 150, 70))
+    badge(3, (130, 230, 255))
     backdrop()
     icons()
 
