@@ -2,7 +2,7 @@
 
 Port Android "3 en 1" de las tres recompilaciones estáticas de la trilogía de plataformas de 16 bits
 (los tres repos originales están en `upstream/game1`, `upstream/game2` y `upstream/game3`).
-Repo: https://github.com/KB-retro/monoloco-16bits. No fusionar cambios de upstream salvo que se pida.
+Repo: https://github.com/KB-retro/Monoloco-Saga. No fusionar cambios de upstream salvo que se pida.
 
 ## Preferencias de KB-retro
 - Hablar en español; commits y código en inglés. Changelogs de una línea por cambio.

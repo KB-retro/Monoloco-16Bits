@@ -26,7 +26,7 @@
     <string name="launcher_unknown_roms">Unrecognised 4 MB files: %1$d (another region or revision?)</string>
     <string name="launcher_bad_cores">Invalid cores: %1$d</string>
     <string name="launcher_crashed">The last session stopped with an error: %1$s</string>
-    <string name="launcher_credits">&lt;a href="https://github.com/KB-retro/monoloco-16bits/commit/%2$s"&gt;Version %1$s&lt;/a&gt;　/　&lt;a href="https://github.com/KB-retro/monoloco-16bits"&gt;Repository&lt;/a&gt;　/　&lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt;</string>
+    <string name="launcher_credits">&lt;a href="https://github.com/KB-retro/Monoloco-Saga/commit/%2$s"&gt;Version %1$s&lt;/a&gt;　/　&lt;a href="https://github.com/KB-retro/Monoloco-Saga"&gt;Repository&lt;/a&gt;　/　&lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt;</string>
 
     <string name="install_title">Installing…</string>
 
@@ -39,7 +39,7 @@
     <string name="settings_delete_cores_confirm">Delete the imported cores? The APK\'s own are kept.</string>
     <string name="settings_cores_deleted">Deleted: %d.</string>
     <string name="settings_back">Back</string>
-    <string name="port_credits_body">Monoloco Saga by &lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt; (Patrulla Retro) · &lt;a href="https://github.com/KB-retro/monoloco-16bits/commit/%2$s"&gt;version %1$s&lt;/a&gt;&lt;br&gt;&lt;br&gt;Android port based on the static recompilations by elliotttate and contributors: &lt;a href="https://github.com/elliotttate/DKC1Recomp"&gt;DKC1Recomp&lt;/a&gt;, &lt;a href="https://github.com/elliotttate/DKC2Recomp"&gt;DKC2Recomp&lt;/a&gt; and &lt;a href="https://github.com/elliotttate/DKC3Recomp"&gt;DKC3Recomp&lt;/a&gt; (MIT license), on &lt;a href="https://github.com/elliotttate/snesrecomp"&gt;snesrecomp&lt;/a&gt; (PolyForm Noncommercial 1.0.0), &lt;a href="https://github.com/libsdl-org/SDL"&gt;SDL2&lt;/a&gt; (zlib) and &lt;a href="https://github.com/libretro/glsl-shaders"&gt;libretro\'s&lt;/a&gt; shaders: Hyllian\'s xBR and CRT (MIT) and Timothy Lottes\' CRT (public domain).&lt;br&gt;&lt;br&gt;Unofficial free project, not affiliated with the owners of the games. No game data included: you need your own copies. Not for sale.</string>
+    <string name="port_credits_body">Monoloco Saga by &lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt; (Patrulla Retro) · &lt;a href="https://github.com/KB-retro/Monoloco-Saga/commit/%2$s"&gt;version %1$s&lt;/a&gt;&lt;br&gt;&lt;br&gt;Android port based on the static recompilations by elliotttate and contributors: &lt;a href="https://github.com/elliotttate/DKC1Recomp"&gt;DKC1Recomp&lt;/a&gt;, &lt;a href="https://github.com/elliotttate/DKC2Recomp"&gt;DKC2Recomp&lt;/a&gt; and &lt;a href="https://github.com/elliotttate/DKC3Recomp"&gt;DKC3Recomp&lt;/a&gt; (MIT license), on &lt;a href="https://github.com/elliotttate/snesrecomp"&gt;snesrecomp&lt;/a&gt; (PolyForm Noncommercial 1.0.0), &lt;a href="https://github.com/libsdl-org/SDL"&gt;SDL2&lt;/a&gt; (zlib) and &lt;a href="https://github.com/libretro/glsl-shaders"&gt;libretro\'s&lt;/a&gt; shaders: Hyllian\'s xBR and CRT (MIT) and Timothy Lottes\' CRT (public domain).&lt;br&gt;&lt;br&gt;Unofficial free project, not affiliated with the owners of the games. No game data included: you need your own copies. Not for sale.</string>
 
     <string name="game_failed_title">The game could not start</string>
     <string name="game_failed_message">Check that the ROM is the USA one and that the core matches this version of the app.\n\n%1$s</string>
